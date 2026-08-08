@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Student Voice - เข้าสู่ระบบและสมัครสมาชิก</title>
+          <!-- Bootstrap 5 CSS -->
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+          <!-- Google Fonts (Prompt) -->
+          <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap"
+                    rel="stylesheet">
+          <style>
+                    :root {
+                              --primary-purple: #7c5cfc;
+                              --primary-hover: #6a4ce2;
+                              --light-purple: #f8f6fc;
+                              --bg-color: #faf9fd;
+                              --text-main: #2d2d3a;
+                              --text-muted: #6b6b7b;
+                              --border-color: #eeeaf4;
+                    }
+
+                    body {
+                              font-family: 'Prompt', sans-serif;
+                              background-color: var(--bg-color);
+                              color: var(--text-main);
+                              min-height: 100vh;
+                              display: flex;
+                              align-items: center;
+                              overflow-x: hidden;
+                              position: relative;
+                    }
+
+                    /* ลูกเล่นพื้นหลัง: วงแสงเบลอเคลื่อนไหวเบาๆ (Ambient Glow) */
+                    .bg-glow-1,
+                    .bg-glow-2 {
+                              position: absolute;
+                              width: 400px;
+                              height: 400px;
+                              border-radius: 50%;
+                              filter: blur(80px);
+                              z-index: -1;
+                              opacity: 0.4;
+                              animation: floatGlow 10s ease-in-out infinite alternate;
+                    }
+
+                    .bg-glow-1 {
+                              top: -10%;
+                              left: -5%;
+                              background: rgba(124, 92, 252, 0.15);
+                    }
+
+                    .bg-glow-2 {
+                              bottom: -10%;
+                              right: -5%;
+                              background: rgba(159, 134, 252, 0.15);
+                              animation-delay: -5s;
+                    }
+
+                    @keyframes floatGlow {
+                              0% {
+                                        transform: translateY(0) scale(1);
+                              }
+
+                              100% {
+                                        transform: translateY(20px) scale(1.05);
+                              }
+                    }
+
+                    /* เอฟเฟกต์ Fade-in ตอนโหลดหน้าเว็บ */
+                    .fade-in-up {
+                              animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    }
+
+                    @keyframes fadeInUp {
+                              from {
+                                        opacity: 0;
+                                        transform: translateY(20px);
+                              }
+
+                              to {
+                                        opacity: 1;
+                                        transform: translateY(0);
+                              }
+                    }
+
+                    /* การ์ดเข้าสู่ระบบและสมัครสมาชิกที่มีมิติ */
+                    .auth-card {
+                              background: rgba(255, 255, 255, 0.9);
+                              backdrop-filter: blur(10px);
+                              border: 1px solid var(--border-color);
+                              border-radius: 24px;
+                              padding: 40px;
+                              box-shadow: 0 20px 40px rgba(124, 92, 252, 0.06);
+                              transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    }
+
+                    .auth-card:hover {
+                              box-shadow: 0 25px 50px rgba(124, 92, 252, 0.1);
+                    }
+
+                    .form-control {
+                              background-color: #faf9fd;
+                              border: 1px solid #e8e3f2;
+                              border-radius: 12px;
+                              padding: 12px 16px;
+                              font-size: 0.95rem;
+                              color: var(--text-main);
+                              transition: all 0.25s ease;
+                    }
+
+                    .form-control:hover {
+                              border-color: #d4cbf2;
+                    }
+
+                    .form-control:focus {
+                              background-color: #ffffff;
+                              border-color: var(--primary-purple);
+                              box-shadow: 0 0 0 4px rgba(124, 92, 252, 0.08);
+                              transform: translateY(-1px);
+                    }
+
+                    /* จัดแต่งช่องรหัสผ่านให้มีพื้นที่สำหรับปุ่มรูปตา */
+                    .password-container {
+                              position: relative;
+                    }
+
+                    .password-container .form-control {
+                              padding-right: 48px;
+                    }
+
+                    .toggle-password {
+                              position: absolute;
+                              top: 50%;
+                              right: 14px;
+                              transform: translateY(-50%);
+                              background: none;
+                              border: none;
+                              color: var(--text-muted);
+                              cursor: pointer;
+                              padding: 0;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              transition: color 0.2s;
+                    }
+
+                    .toggle-password:hover {
+                              color: var(--primary-purple);
+                    }
+
+                    .form-label {
+                              font-weight: 500;
+                              font-size: 0.9rem;
+                              margin-bottom: 6px;
+                              color: var(--text-main);
+                    }
+
+                    /* ปุ่มกดมีลูกเล่นขยับขึ้นตอนเอาเมาส์ชี้ */
+                    .btn-primary-custom {
+                              background-color: var(--primary-purple);
+                              color: white;
+                              border-radius: 12px;
+                              padding: 12px;
+                              font-weight: 500;
+                              border: none;
+                              width: 100%;
+                              transition: all 0.25s ease;
+                              box-shadow: 0 4px 12px rgba(124, 92, 252, 0.2);
+                    }
+
+                    .btn-primary-custom:hover {
+                              background-color: var(--primary-hover);
+                              transform: translateY(-2px);
+                              box-shadow: 0 6px 20px rgba(124, 92, 252, 0.3);
+                              color: white;
+                    }
+
+                    /* รายการฟีเจอร์ด้านซ้าย */
+                    .feature-item {
+                              background: #ffffff;
+                              border: 1px solid var(--border-color);
+                              border-radius: 14px;
+                              padding: 18px 22px;
+                              font-size: 0.9rem;
+                              color: var(--text-muted);
+                              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+                              transition: all 0.3s ease;
+                    }
+
+                    .feature-item:hover {
+                              border-color: #d4cbf2;
+                              transform: translateX(6px);
+                              color: var(--text-main);
+                              background: #ffffff;
+                              box-shadow: 0 4px 12px rgba(124, 92, 252, 0.04);
+                    }
+
+                    .badge-custom {
+                              background-color: var(--light-purple);
+                              color: var(--primary-purple);
+                              font-weight: 400;
+                              font-size: 0.85rem;
+                              padding: 6px 16px;
+                              border-radius: 20px;
+                              display: inline-block;
+                    }
+
+                    .form-switch-link {
+                              color: var(--primary-purple);
+                              text-decoration: none;
+                              font-weight: 500;
+                              cursor: pointer;
+                              transition: color 0.2s;
+                    }
+
+                    .form-switch-link:hover {
+                              color: var(--primary-hover);
+                              text-decoration: underline;
+                    }
+          </style>
+</head>
+
+<body>
+
+          <!-- แสงพื้นหลังเคลื่อนไหวแบบมินิมอล -->
+          <div class="bg-glow-1"></div>
+          <div class="bg-glow-2"></div>
+
+          <div class="container py-5 fade-in-up">
+                    <div class="row align-items-center justify-content-center g-5">
+
+                              <!-- ฝั่งซ้าย: ข้อความแนะนำโครงการ -->
+                              <div class="col-lg-6">
+                                        <div class="pe-lg-4">
+                                                  <span class="badge-custom mb-3">
+                                                            พื้นที่รับฟังความคิดเห็นนักศึกษา
+                                                  </span>
+                                                  <h1 class="fw-bold display-6 mb-3"
+                                                            style="letter-spacing: -0.5px; line-height: 1.3;">
+                                                            แจ้งปัญหา ส่งความคิดเห็น และติดตามการแก้ไข
+                                                  </h1>
+                                                  <p class="text-muted mb-4"
+                                                            style="font-size: 1.05rem; line-height: 1.6;">
+                                                            ระบบ Student Voice ของนักศึกษากับผู้ดูแล
+                                                            ทั้งในส่วนของคำร้องทั่วไปและการแจ้งซ่อมบำรุงภายในสถานศึกษา
+                                                  </p>
+
+                                                  <!-- Feature List พร้อมลูกเล่น Hover ขยับขวา -->
+                                                  <div class="d-flex flex-column gap-3">
+                                                            <div class="feature-item">
+                                                                      ส่งรายละเอียดคำร้องหรือข้อเสนอแนะได้อย่างเป็นระบบ
+                                                            </div>
+                                                            <div class="feature-item">
+                                                                      แจ้งซ่อมอุปกรณ์ ห้องเรียน หรือพื้นที่ส่วนกลาง
+                                                            </div>
+                                                            <div class="feature-item">
+                                                                      ติดตามสถานะการดำเนินงานได้ทุกขั้นตอน
+                                                            </div>
+                                                  </div>
+                                        </div>
+                              </div>
+
+                              <!-- ฝั่งขวา: ฟอร์มสลับระหว่าง Login และ Register -->
+                              <div class="col-lg-5">
+                                        <div class="auth-card">
+
+                                                  <!-- ฟอร์มเข้าสู่ระบบ (Login Form) -->
+                                                  <div id="loginSection">
+                                                            <div class="mb-4">
+                                                                      <h3 class="h5 fw-bold mb-1">เข้าสู่ระบบ</h3>
+                                                                      <p class="text-muted mb-0"
+                                                                                style="font-size: 0.85rem;">
+                                                                                ระบุข้อมูลเพื่อเข้าสู่ระบบและติดตามรายการของคุณ
+                                                                      </p>
+                                                            </div>
+
+                                                            <form>
+                                                                      <div class="mb-3">
+                                                                                <label for="loginStudentId"
+                                                                                          class="form-label">รหัสนักศึกษา</label>
+                                                                                <input type="text" class="form-control"
+                                                                                          id="loginStudentId"
+                                                                                          placeholder="ระบุรหัสนักศึกษา">
+                                                                      </div>
+
+                                                                      <div class="mb-4">
+                                                                                <label for="loginPassword"
+                                                                                          class="form-label">รหัสผ่าน</label>
+                                                                                <div class="password-container">
+                                                                                          <input type="password"
+                                                                                                    class="form-control"
+                                                                                                    id="loginPassword"
+                                                                                                    placeholder="ระบุรหัสผ่าน">
+                                                                                          <button type="button"
+                                                                                                    class="toggle-password"
+                                                                                                    onclick="togglePasswordVisibility('loginPassword', this)">
+                                                                                                    <!-- ไอคอนรูปดวงตา (SVG) -->
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                                              width="18"
+                                                                                                              height="18"
+                                                                                                              viewBox="0 0 24 24"
+                                                                                                              fill="none"
+                                                                                                              stroke="currentColor"
+                                                                                                              stroke-width="2"
+                                                                                                              stroke-linecap="round"
+                                                                                                              stroke-linejoin="round">
+                                                                                                              <path
+                                                                                                                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+                                                                                                              </path>
+                                                                                                              <circle cx="12"
+                                                                                                                        cy="12"
+                                                                                                                        r="3">
+                                                                                                              </circle>
+                                                                                                    </svg>
+                                                                                          </button>
+                                                                                </div>
+                                                                      </div>
+
+                                                                      <button type="submit"
+                                                                                class="btn btn-primary-custom mb-3">เข้าสู่ระบบ</button>
+
+                                                                      <div class="text-center">
+                                                                                <p class="text-muted mb-0"
+                                                                                          style="font-size: 0.85rem;">
+                                                                                          ยังไม่มีบัญชีผู้ใช้งาน? <span
+                                                                                                    class="form-switch-link"
+                                                                                                    onclick="toggleAuthMode()">สมัครสมาชิก</span>
+                                                                                </p>
+                                                                      </div>
+                                                            </form>
+                                                  </div>
+
+                                                  <!-- ฟอร์มสมัครสมาชิก (Register Form - ซ่อนไว้เริ่มต้น) -->
+                                                  <div id="registerSection" style="display: none;">
+                                                            <div class="mb-3">
+                                                                      <h3 class="h5 fw-bold mb-1">สมัครสมาชิก</h3>
+                                                                      <p class="text-muted mb-0"
+                                                                                style="font-size: 0.85rem;">
+                                                                                กรอกข้อมูลส่วนตัวเพื่อสร้างบัญชีผู้ใช้งานใหม่
+                                                                      </p>
+                                                            </div>
+
+                                                            <form>
+                                                                      <div class="mb-2">
+                                                                                <label for="regStudentId"
+                                                                                          class="form-label">รหัสนักศึกษา</label>
+                                                                                <input type="text" class="form-control"
+                                                                                          id="regStudentId"
+                                                                                          placeholder="ระบุรหัสนักศึกษา">
+                                                                      </div>
+
+                                                                      <div class="row">
+                                                                                <div class="col-md-6 mb-2">
+                                                                                          <label for="regFirstName"
+                                                                                                    class="form-label">ชื่อจริง</label>
+                                                                                          <input type="text"
+                                                                                                    class="form-control"
+                                                                                                    id="regFirstName"
+                                                                                                    placeholder="ชื่อจริง">
+                                                                                </div>
+                                                                                <div class="col-md-6 mb-2">
+                                                                                          <label for="regLastName"
+                                                                                                    class="form-label">นามสกุล</label>
+                                                                                          <input type="text"
+                                                                                                    class="form-control"
+                                                                                                    id="regLastName"
+                                                                                                    placeholder="นามสกุล">
+                                                                                </div>
+                                                                      </div>
+
+                                                                      <div class="mb-2">
+                                                                                <label for="regEmail"
+                                                                                          class="form-label">อีเมล</label>
+                                                                                <input type="email" class="form-control"
+                                                                                          id="regEmail"
+                                                                                          placeholder="username@e-tech.ac.th">
+                                                                      </div>
+
+                                                                      <div class="mb-2">
+                                                                                <label for="regPassword"
+                                                                                          class="form-label">รหัสผ่าน</label>
+                                                                                <div class="password-container">
+                                                                                          <input type="password"
+                                                                                                    class="form-control"
+                                                                                                    id="regPassword"
+                                                                                                    placeholder="กำหนดรหัสผ่าน">
+                                                                                          <button type="button"
+                                                                                                    class="toggle-password"
+                                                                                                    onclick="togglePasswordVisibility('regPassword', this)">
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                                              width="18"
+                                                                                                              height="18"
+                                                                                                              viewBox="0 0 24 24"
+                                                                                                              fill="none"
+                                                                                                              stroke="currentColor"
+                                                                                                              stroke-width="2"
+                                                                                                              stroke-linecap="round"
+                                                                                                              stroke-linejoin="round">
+                                                                                                              <path
+                                                                                                                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+                                                                                                              </path>
+                                                                                                              <circle cx="12"
+                                                                                                                        cy="12"
+                                                                                                                        r="3">
+                                                                                                              </circle>
+                                                                                                    </svg>
+                                                                                          </button>
+                                                                                </div>
+                                                                      </div>
+
+                                                                      <div class="mb-3">
+                                                                                <label for="regConfirmPassword"
+                                                                                          class="form-label">ยืนยันรหัสผ่าน</label>
+                                                                                <div class="password-container">
+                                                                                          <input type="password"
+                                                                                                    class="form-control"
+                                                                                                    id="regConfirmPassword"
+                                                                                                    placeholder="ยืนยันรหัสผ่านอีกครั้ง">
+                                                                                          <button type="button"
+                                                                                                    class="toggle-password"
+                                                                                                    onclick="togglePasswordVisibility('regConfirmPassword', this)">
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                                              width="18"
+                                                                                                              height="18"
+                                                                                                              viewBox="0 0 24 24"
+                                                                                                              fill="none"
+                                                                                                              stroke="currentColor"
+                                                                                                              stroke-width="2"
+                                                                                                              stroke-linecap="round"
+                                                                                                              stroke-linejoin="round">
+                                                                                                              <path
+                                                                                                                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z">
+                                                                                                              </path>
+                                                                                                              <circle cx="12"
+                                                                                                                        cy="12"
+                                                                                                                        r="3">
+                                                                                                              </circle>
+                                                                                                    </svg>
+                                                                                          </button>
+                                                                                </div>
+                                                                      </div>
+
+                                                                      <button type="submit"
+                                                                                class="btn btn-primary-custom mb-3">สมัครสมาชิก</button>
+
+                                                                      <div class="text-center">
+                                                                                <p class="text-muted mb-0"
+                                                                                          style="font-size: 0.85rem;">
+                                                                                          มีบัญชีผู้ใช้งานอยู่แล้ว?
+                                                                                          <span class="form-switch-link"
+                                                                                                    onclick="toggleAuthMode()">เข้าสู่ระบบ</span>
+                                                                                </p>
+                                                                      </div>
+                                                            </form>
+                                                  </div>
+
+                                        </div>
+                              </div>
+
+                    </div>
+          </div>
+
+          <!-- Bootstrap 5 JS Bundle และฟังก์ชันการทำงาน -->
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+          <script>
+                    // ฟังก์ชันสลับมุมมองฟอร์ม Login / Register
+                    function toggleAuthMode() {
+                              const loginSec = document.getElementById('loginSection');
+                              const registerSec = document.getElementById('registerSection');
+
+                              if (loginSec.style.display === 'none') {
+                                        loginSec.style.display = 'block';
+                                        registerSec.style.display = 'none';
+                              } else {
+                                        loginSec.style.display = 'none';
+                                        registerSec.style.display = 'block';
+                              }
+                    }
+
+                    // ฟังก์ชันเปิด-ปิดการแสดงรหัสผ่าน พร้อมเปลี่ยนไอคอนรูปตา
+                    function togglePasswordVisibility(fieldId, btnElement) {
+                              const passwordField = document.getElementById(fieldId);
+
+                              // สลับประเภทของ input ระหว่าง password กับ text
+                              if (passwordField.type === 'password') {
+                                        passwordField.type = 'text';
+                                        // เปลี่ยนไอคอนเป็นตาแบบถูกขีดเส้น (ซ่อนรหัส)
+                                        btnElement.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                `;
+                              } else {
+                                        passwordField.type = 'password';
+                                        // เปลี่ยนไอคอนกลับเป็นตาปกติ (แสดงรหัส)
+                                        btnElement.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                `;
+                              }
+                    }
+          </script>
+</body>
+
+</html>

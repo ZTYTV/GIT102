@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Student Voice - Minimalist Design</title>
+          <!-- Bootstrap 5 CSS -->
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+          <!-- Google Fonts (Prompt) -->
+          <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap"
+                    rel="stylesheet">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+          <style>
+                    :root {
+                              --primary-purple: #7c5cfc;
+                              --primary-hover: #6a4ce2;
+                              --light-purple: #f8f6fc;
+                              --bg-color: #faf9fd;
+                              --card-bg: #ffffff;
+                              --text-main: #2d2d3a;
+                              --text-muted: #6b6b7b;
+                              --border-color: #eeeaf4;
+                              --glow-opacity: 0.3;
+                              --status-green: #22c55e;
+                              --status-green-light: #eafbf1;
+                    }
+
+                    /* Dark Mode: ตั้งค่าสีข้อความอธิบายให้เป็นสีขาว/เทาสว่างเพื่อให้อ่านง่ายชัดเจน */
+                    [data-theme="dark"] {
+                              --primary-purple: #b49ffc;
+                              --primary-hover: #c4b5fd;
+                              --light-purple: rgba(180, 159, 252, 0.15);
+                              --bg-color: #242428;
+                              --card-bg: #2d2d32;
+                              --text-main: #ffffff;
+                              --text-muted: #e4e4eb !important;
+                              /* บังคับให้ข้อความอธิบายเป็นสีขาวสว่างชัดเจน */
+                              --border-color: #44444d;
+                              --glow-opacity: 0.08;
+                              --status-green: #4ade80;
+                              --status-green-light: rgba(74, 222, 128, 0.12);
+                    }
+
+                    body {
+                              font-family: 'Prompt', sans-serif;
+                              background-color: var(--bg-color);
+                              color: var(--text-main);
+                              min-height: 100vh;
+                              overflow-x: hidden;
+                              position: relative;
+                              transition: background-color 0.3s ease, color 0.3s ease;
+                    }
+
+                    /* ลูกเล่นพื้นหลัง: วงแสงเบลอเคลื่อนไหวเบาๆ (Ambient Glow) */
+                    .bg-glow-1,
+                    .bg-glow-2 {
+                              position: absolute;
+                              width: 400px;
+                              height: 400px;
+                              border-radius: 50%;
+                              filter: blur(90px);
+                              z-index: -1;
+                              opacity: var(--glow-opacity);
+                              animation: floatGlow 10s ease-in-out infinite alternate;
+                              transition: opacity 0.3s ease;
+                    }
+
+                    .bg-glow-1 {
+                              top: 5%;
+                              left: 10%;
+                              background: rgba(124, 92, 252, 0.25);
+                    }
+
+                    .bg-glow-2 {
+                              bottom: 10%;
+                              right: 10%;
+                              background: rgba(159, 134, 252, 0.2);
+                              animation-delay: -5s;
+                    }
+
+                    @keyframes floatGlow {
+                              0% {
+                                        transform: translateY(0) scale(1);
+                              }
+
+                              100% {
+                                        transform: translateY(20px) scale(1.05);
+                              }
+                    }
+
+                    /* เอฟเฟกต์ Fade-in ตอนโหลดหน้าเว็บ */
+                    .fade-in-up {
+                              animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    }
+
+                    @keyframes fadeInUp {
+                              from {
+                                        opacity: 0;
+                                        transform: translateY(20px);
+                              }
+
+                              to {
+                                        opacity: 1;
+                                        transform: translateY(0);
+                              }
+                    }
+
+                    /* Navbar Minimalist */
+                    .navbar {
+                              background: var(--card-bg);
+                              backdrop-filter: blur(10px);
+                              border-bottom: 1px solid var(--border-color);
+                              padding: 14px 0;
+                              transition: all 0.3s ease;
+                    }
+
+                    .navbar-brand {
+                              font-weight: 600;
+                              color: var(--primary-purple) !important;
+                              font-size: 1.05rem;
+                    }
+
+                    .nav-link {
+                              color: var(--text-muted) !important;
+                              font-weight: 400;
+                              font-size: 0.95rem;
+                              transition: color 0.2s;
+                              position: relative;
+                    }
+
+                    .nav-link::after {
+                              content: '';
+                              position: absolute;
+                              width: 0;
+                              height: 2px;
+                              bottom: 0;
+                              left: 0;
+                              background-color: var(--primary-purple);
+                              transition: width 0.3s ease;
+                    }
+
+                    .nav-link:hover::after,
+                    .nav-link.active::after {
+                              width: 100%;
+                    }
+
+                    .nav-link:hover,
+                    .nav-link.active {
+                              color: var(--primary-purple) !important;
+                    }
+
+                    /* ปุ่ม Dark Mode สไตล์มินิมอล */
+                    .btn-theme-toggle {
+                              border: 1px solid var(--border-color);
+                              color: var(--text-main);
+                              background: transparent;
+                              border-radius: 50px;
+                              width: 40px;
+                              height: 40px;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              transition: all 0.2s ease;
+                    }
+
+                    .btn-theme-toggle:hover {
+                              background-color: var(--light-purple);
+                              border-color: var(--primary-purple);
+                              color: var(--primary-purple);
+                    }
+
+                    /* ปุ่มออกจากระบบสไตล์มินิมอล */
+                    .btn-logout {
+                              border: 1px solid var(--border-color);
+                              color: var(--text-muted);
+                              background: transparent;
+                              border-radius: 50px;
+                              padding: 6px 18px;
+                              font-size: 0.9rem;
+                              font-weight: 400;
+                              transition: all 0.2s ease;
+                    }
+
+                    .btn-logout:hover {
+                              background-color: rgba(239, 68, 68, 0.1);
+                              border-color: #ef4444;
+                              color: #ef4444;
+                              transform: translateY(-1px);
+                    }
+
+                    /* Hero Banner */
+                    .hero-banner {
+                              background: linear-gradient(135deg, #7c5cfc 0%, #9f86fc 100%);
+                              border-radius: 24px;
+                              color: white;
+                              padding: 45px;
+                              margin-top: 30px;
+                              margin-bottom: 30px;
+                              box-shadow: 0 15px 35px rgba(124, 92, 252, 0.15);
+                              transition: transform 0.3s ease;
+                    }
+
+                    .hero-banner:hover {
+                              transform: translateY(-2px);
+                    }
+
+                    /* Minimalist Cards พร้อมลูกเล่น Hover ยกตัวขึ้น */
+                    .service-card {
+                              background: var(--card-bg);
+                              border: 1px solid var(--border-color);
+                              border-radius: 20px;
+                              padding: 35px;
+                              transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+                              height: 100%;
+                              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+                    }
+
+                    .service-card:hover {
+                              transform: translateY(-6px);
+                              box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+                              border-color: var(--primary-purple);
+                    }
+
+                    .icon-box {
+                              width: 52px;
+                              height: 52px;
+                              background: var(--light-purple);
+                              color: var(--primary-purple);
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              border-radius: 14px;
+                              margin-bottom: 20px;
+                              font-weight: 600;
+                              font-size: 1rem;
+                              transition: transform 0.3s ease, background-color 0.3s ease;
+                    }
+
+                    .service-card:hover .icon-box {
+                              transform: scale(1.05);
+                    }
+
+                    .card-link {
+                              color: var(--primary-purple);
+                              text-decoration: none;
+                              font-weight: 500;
+                              display: inline-flex;
+                              align-items: center;
+                              gap: 6px;
+                              margin-top: 15px;
+                              transition: gap 0.2s ease;
+                    }
+
+                    .card-link:hover {
+                              gap: 10px;
+                              color: var(--primary-hover);
+                              text-decoration: none;
+                    }
+
+                    /* Quick Status Banner (Bottom) — ธีมเขียวสำหรับสถานะ */
+                    .status-banner {
+                              background: var(--card-bg);
+                              border: 1px solid var(--border-color);
+                              border-radius: 20px;
+                              padding: 20px 25px;
+                              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+                              transition: all 0.3s ease;
+                              position: relative;
+                              overflow: hidden;
+                    }
+
+                    .status-banner::before {
+                              content: '';
+                              position: absolute;
+                              left: 0;
+                              top: 0;
+                              bottom: 0;
+                              width: 4px;
+                              background: var(--status-green);
+                              border-radius: 20px 0 0 20px;
+                    }
+
+                    .status-banner:hover {
+                              box-shadow: 0 10px 30px rgba(34, 197, 94, 0.15);
+                              border-color: var(--status-green);
+                    }
+
+                    .status-banner .icon-box {
+                              background: var(--status-green-light);
+                              color: var(--status-green);
+                              position: relative;
+                    }
+
+                    /* จุดไฟกะพริบ บอกว่าระบบติดตามสถานะทำงานแบบ live */
+                    .status-live-dot {
+                              width: 9px;
+                              height: 9px;
+                              border-radius: 50%;
+                              background: var(--status-green);
+                              display: inline-block;
+                              position: relative;
+                    }
+
+                    .status-live-dot::after {
+                              content: '';
+                              position: absolute;
+                              inset: 0;
+                              border-radius: 50%;
+                              background: var(--status-green);
+                              animation: statusPulse 1.8s ease-out infinite;
+                    }
+
+                    @keyframes statusPulse {
+                              0% {
+                                        transform: scale(1);
+                                        opacity: 0.7;
+                              }
+
+                              100% {
+                                        transform: scale(2.8);
+                                        opacity: 0;
+                              }
+                    }
+
+                    .status-title-row {
+                              display: flex;
+                              align-items: center;
+                              gap: 8px;
+                    }
+
+                    .btn-status-track {
+                              border: 1px solid var(--status-green);
+                              color: var(--status-green);
+                              background: transparent;
+                              border-radius: 50px;
+                              padding: 8px 22px;
+                              font-size: 0.9rem;
+                              font-weight: 500;
+                              transition: all 0.2s ease;
+                    }
+
+                    .btn-status-track:hover {
+                              background-color: var(--status-green);
+                              border-color: var(--status-green);
+                              color: white;
+                              transform: translateY(-1px);
+                              box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3);
+                    }
+
+                    [data-theme="dark"] .text-muted {
+                              color: var(--text-muted) !important;
+                    }
+          </style>
+</head>
+
+<body>
+
+          <!-- แสงพื้นหลังเคลื่อนไหวแบบมินิมอล -->
+          <div class="bg-glow-1"></div>
+          <div class="bg-glow-2"></div>
+
+          <!-- Navigation Bar -->
+          <nav class="navbar navbar-expand-lg sticky-top">
+                    <div class="container">
+                              <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                                        <span
+                                                  style="background: var(--primary-purple); width: 8px; height: 8px; display: inline-block; border-radius: 50%;"></span>
+                                        Student Voice
+                              </a>
+                              <button class="navbar-toggler border-0 shadow-none" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                                        <span class="navbar-toggler-icon"></span>
+                              </button>
+                              <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                                        <ul class="navbar-nav align-items-lg-center gap-lg-4 mx-auto mt-3 mt-lg-0">
+                                                  <li class="nav-item"><a class="nav-link active" href="#">หน้าหลัก</a>
+                                                  </li>
+                                                  <li class="nav-item"><a class="nav-link" href="./report.html">ส่งคำร้อง</a></li>
+                                                  <li class="nav-item"><a class="nav-link" href="./repair.html">ระบบแจ้งซ่อม</a>
+                                                  </li>
+                                                  <li class="nav-item"><a class="nav-link" href="#">ติดตามสถานะ</a></li>
+                                                  <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
+                                        </ul>
+
+                                        <!-- ส่วนขวา: ข้อมูลผู้ใช้, ปุ่ม Dark Mode, และ ออกจากระบบ -->
+                                        <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+
+                                                  <!-- ข้อมูลผู้ใช้งาน (ชื่อ และ รหัสนักศึกษา/สถานะ) -->
+                                                  <div class="d-flex flex-column text-end d-none d-sm-flex">
+                                                            <span class="fw-medium"
+                                                                      style="font-size: 0.9rem; color: var(--text-main);">ชื่อ</span>
+                                                            <span class="text-muted"
+                                                                      style="font-size: 0.75rem;">รหัสนักศึกษา
+                                                                      6543210</span>
+                                                  </div>
+
+                                                  <!-- เส้นคั่นแบบบาง (Divider) -->
+                                                  <div style="width: 1px; height: 24px; background-color: var(--border-color);"
+                                                            class="d-none d-sm-block"></div>
+
+                                                  <!-- ปุ่มสลับ Dark Mode -->
+                                                  <button class="btn-theme-toggle" id="themeToggleBtn"
+                                                            title="สลับโหมดการแสดงผล">
+                                                            <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg"
+                                                                      width="18" height="18" fill="currentColor"
+                                                                      viewBox="0 0 16 16">
+                                                                      <path
+                                                                                d="M6 .278a.768.768 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z" />
+                                                            </svg>
+                                                  </button>
+
+                                                  <!-- ปุ่มออกจากระบบ -->
+                                                  <a href="#" class="btn btn-logout">ออกจากระบบ</a>
+                                        </div>
+                              </div>
+                    </div>
+          </nav>
+
+          <!-- Main Container -->
+          <main class="container pb-5 fade-in-up">
+
+                    <!-- Hero Section -->
+                    <section class="hero-banner">
+                              <div class="row align-items-center">
+                                        <div class="col-lg-8">
+                                                  <span class="badge bg-white text-dark bg-opacity-25 mb-3 px-3 py-1 rounded-pill fw-normal"
+                                                            style="font-size: 0.85rem;">Student Voice Service Hub</span>
+                                                  <h1 class="fw-bold display-6 mb-3">วันนี้ต้องการให้เราช่วยเรื่องอะไร?
+                                                  </h1>
+                                                  <p class="mb-0 text-white-50"
+                                                            style="font-size: 1.05rem; line-height: 1.6;">
+                                                            เลือกส่งคำร้องทั่วไปหรือแจ้งซ่อม
+                                                            พร้อมกลับมาติดตามสถานะการดำเนินงานได้จากหน้าเดียวกัน</p>
+                                        </div>
+                              </div>
+                    </section>
+
+                    <!-- Selection Cards Grid -->
+                    <div class="row g-4">
+                              <!-- Card 1: ส่งคำร้อง -->
+                              <div class="col-md-6">
+                                        <div class="service-card">
+                                                  <div class="icon-box"><i class="bi bi-file-earmark-text"></i></div>
+                                                  <h3 class="h5 fw-bold mb-2">ส่งคำร้องหรือความคิดเห็น</h3>
+                                                  <p class="text-muted mb-4"
+                                                            style="font-size: 0.95rem; line-height: 1.6;">บอกเล่าปัญหา
+                                                            ความกังวล
+                                                            หรือข้อเสนอแนะที่อยากส่งถึงผู้ดูแลระบบอย่างเป็นระบบ</p>
+                                                  <a href="./report.html" class="card-link">เริ่มเขียนคำร้อง &rarr;</a>
+                                        </div>
+                              </div>
+
+                              <!-- Card 2: ระบบแจ้งซ่อม -->
+                              <div class="col-md-6">
+                                        <div class="service-card">
+                                                  <div class="icon-box"><i class="bi bi-tools"></i></div>
+                                                  <h3 class="h5 fw-bold mb-2">ระบบแจ้งซ่อม</h3>
+                                                  <p class="text-muted mb-4"
+                                                            style="font-size: 0.95rem; line-height: 1.6;">
+                                                            แจ้งปัญหาในห้องน้ำหรือห้องเรียน พร้อมระบุอาคาร ห้อง
+                                                            และรายละเอียดความเสียหาย</p>
+                                                  <a href="./repair.html" class="card-link">แจ้งซ่อมตอนนี้ &rarr;</a>
+                                        </div>
+                              </div>
+                    </div>
+
+                    <!-- Quick Status Banner (Bottom) -->
+                    <div class="row mt-4">
+                              <div class="col-12">
+                                        <div
+                                                  class="status-banner d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                                  <div class="d-flex align-items-center gap-3">
+                                                            <div class="icon-box m-0"
+                                                                      style="width: 44px; height: 44px; font-size: 1.1rem;">
+                                                                      <i class="bi bi-clock-history"></i>
+                                                            </div>
+                                                            <div>
+                                                                      <div class="status-title-row mb-1">
+                                                                                <span class="status-live-dot"></span>
+                                                                                <h6 class="mb-0 fw-bold"
+                                                                                          style="font-size: 0.95rem;">
+                                                                                          ส่งไปแล้ว?
+                                                                                          ติดตามสถานะได้ที่นี่</h6>
+                                                                      </div>
+                                                                      <p class="mb-0 text-muted"
+                                                                                style="font-size: 0.85rem;">
+                                                                                ดูว่ารายการได้รับเรื่อง กำลังดำเนินการ
+                                                                                หรือเสร็จสิ้นแล้ว</p>
+                                                            </div>
+                                                  </div>
+                                                  <a href="#" class="btn btn-status-track">ติดตามสถานะ</a>
+                                        </div>
+                              </div>
+                    </div>
+
+          </main>
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+          <!-- Script สำหรับควบคุม Dark Mode -->
+          <script>
+                    const themeToggleBtn = document.getElementById('themeToggleBtn');
+                    const themeIcon = document.getElementById('themeIcon');
+                    const htmlElement = document.documentElement;
+
+                    const savedTheme = localStorage.getItem('theme') || 'light';
+                    if (savedTheme === 'dark') {
+                              htmlElement.setAttribute('data-theme', 'dark');
+                              setSunIcon();
+                    }
+
+                    themeToggleBtn.addEventListener('click', () => {
+                              if (htmlElement.getAttribute('data-theme') === 'dark') {
+                                        htmlElement.removeAttribute('data-theme');
+                                        localStorage.setItem('theme', 'light');
+                                        setMoonIcon();
+                              } else {
+                                        htmlElement.setAttribute('data-theme', 'dark');
+                                        localStorage.setItem('theme', 'dark');
+                                        setSunIcon();
+                              }
+                    });
+
+                    function setMoonIcon() {
+                              themeIcon.innerHTML = '<path d="M6 .278a.768.768 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>';
+                    }
+
+                    function setSunIcon() {
+                              themeIcon.innerHTML = '<path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>';
+                    }
+          </script>
+</body>
+
+</html>

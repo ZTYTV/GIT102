@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Student Voice - ระบบแจ้งซ่อม</title>
+          <!-- Bootstrap 5 CSS -->
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+          <!-- Google Fonts (Prompt) -->
+          <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap"
+                    rel="stylesheet">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+          <style>
+                    :root {
+                              --primary-purple: #7c5cfc;
+                              --primary-hover: #6a4ce2;
+                              --light-purple: #f8f6fc;
+                              --bg-color: #faf9fd;
+                              --card-bg: #ffffff;
+                              --text-main: #2d2d3a;
+                              --text-muted: #6b6b7b;
+                              --border-color: #eeeaf4;
+                              --glow-opacity: 0.3;
+                    }
+
+                    /* Dark Mode Support */
+                    [data-theme="dark"] {
+                              --primary-purple: #b49ffc;
+                              --primary-hover: #c4b5fd;
+                              --light-purple: rgba(180, 159, 252, 0.15);
+                              --bg-color: #242428;
+                              --card-bg: #2d2d32;
+                              --text-main: #ffffff;
+                              --text-muted: #e4e4eb !important;
+                              --border-color: #44444d;
+                              --glow-opacity: 0.08;
+                    }
+
+                    body {
+                              font-family: 'Prompt', sans-serif;
+                              background-color: var(--bg-color);
+                              color: var(--text-main);
+                              min-height: 100vh;
+                              overflow-x: hidden;
+                              position: relative;
+                              transition: background-color 0.3s ease, color 0.3s ease;
+                    }
+
+                    /* Ambient Glow Background Animation */
+                    .bg-glow-1,
+                    .bg-glow-2 {
+                              position: absolute;
+                              width: 450px;
+                              height: 450px;
+                              border-radius: 50%;
+                              filter: blur(100px);
+                              z-index: -1;
+                              opacity: var(--glow-opacity);
+                              animation: floatGlow 12s ease-in-out infinite alternate;
+                              transition: opacity 0.3s ease;
+                    }
+
+                    .bg-glow-1 {
+                              top: 5%;
+                              left: 10%;
+                              background: rgba(124, 92, 252, 0.25);
+                    }
+
+                    .bg-glow-2 {
+                              bottom: 10%;
+                              right: 10%;
+                              background: rgba(159, 134, 252, 0.2);
+                              animation-delay: -6s;
+                    }
+
+                    @keyframes floatGlow {
+                              0% {
+                                        transform: translateY(0) scale(1);
+                              }
+
+                              100% {
+                                        transform: translateY(25px) scale(1.08);
+                              }
+                    }
+
+                    /* Page Entrance Animation */
+                    .fade-in-up {
+                              animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    }
+
+                    @keyframes fadeInUp {
+                              from {
+                                        opacity: 0;
+                                        transform: translateY(25px);
+                              }
+
+                              to {
+                                        opacity: 1;
+                                        transform: translateY(0);
+                              }
+                    }
+
+                    /* Navbar Minimalist */
+                    .navbar {
+                              background: var(--card-bg);
+                              backdrop-filter: blur(10px);
+                              border-bottom: 1px solid var(--border-color);
+                              padding: 14px 0;
+                              transition: all 0.3s ease;
+                    }
+
+                    .navbar-brand {
+                              font-weight: 600;
+                              color: var(--primary-purple) !important;
+                              font-size: 1.05rem;
+                    }
+
+                    /* ตัว container ของเมนู ต้อง relative เพื่อเป็นกรอบอ้างอิงให้ indicator เลื่อนได้ */
+                    .navbar-nav {
+                              position: relative;
+                    }
+
+                    .nav-link {
+                              color: var(--text-muted) !important;
+                              font-weight: 400;
+                              font-size: 0.95rem;
+                              transition: color 0.2s;
+                              position: relative;
+                    }
+
+                    .nav-link:hover,
+                    .nav-link.active {
+                              color: var(--primary-purple) !important;
+                    }
+
+                    /* แท่ง indicator เดียวที่เลื่อนไปมาใต้เมนูที่เลือก/hover แทนเส้นแยกของแต่ละอัน */
+                    .nav-indicator {
+                              position: absolute;
+                              bottom: -2px;
+                              height: 2px;
+                              background-color: var(--primary-purple);
+                              border-radius: 2px;
+                              left: 0;
+                              width: 0;
+                              opacity: 0;
+                              transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+                                        width 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+                                        opacity 0.2s ease;
+                    }
+
+                    .nav-indicator.ready {
+                              opacity: 1;
+                    }
+
+                    .btn-theme-toggle {
+                              border: 1px solid var(--border-color);
+                              color: var(--text-main);
+                              background: transparent;
+                              border-radius: 50px;
+                              width: 40px;
+                              height: 40px;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              transition: all 0.2s ease;
+                    }
+
+                    .btn-theme-toggle:hover {
+                              background-color: var(--light-purple);
+                              border-color: var(--primary-purple);
+                              color: var(--primary-purple);
+                    }
+
+                    /* ปุ่มออกจากระบบ - เพิ่มสไตล์ให้เหมือน report.html */
+                    .btn-logout {
+                              border: 1px solid var(--border-color);
+                              color: var(--text-muted);
+                              background: transparent;
+                              border-radius: 50px;
+                              padding: 6px 18px;
+                              font-size: 0.9rem;
+                              font-weight: 400;
+                              transition: all 0.2s ease;
+                              text-decoration: none;
+                    }
+
+                    .btn-logout:hover {
+                              background-color: rgba(239, 68, 68, 0.1);
+                              border-color: #ef4444;
+                              color: #ef4444;
+                              transform: translateY(-1px);
+                    }
+
+                    /* User Profile Banner Card (แยกส่วนหัวตามเรฟ) */
+                    .user-profile-banner {
+                              background: var(--card-bg);
+                              border: 1px solid var(--border-color);
+                              border-radius: 20px;
+                              padding: 24px;
+                              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+                              transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    }
+
+                    .user-profile-banner:hover {
+                              transform: translateY(-2px);
+                              box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
+                    }
+
+                    /* Main Card Component */
+                    .custom-card {
+                              background: var(--card-bg);
+                              border: 1px solid var(--border-color);
+                              border-radius: 24px;
+                              padding: 35px;
+                              box-shadow: 0 4px 25px rgba(0, 0, 0, 0.02);
+                              transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+                    }
+
+                    .custom-card:hover {
+                              transform: translateY(-4px);
+                              box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
+                    }
+
+                    /* Selection Radio Cards */
+                    .select-card {
+                              border: 1px solid var(--border-color);
+                              border-radius: 16px;
+                              padding: 20px;
+                              cursor: pointer;
+                              transition: all 0.25s ease;
+                              background: var(--card-bg);
+                    }
+
+                    .select-card:hover {
+                              border-color: var(--primary-purple);
+                              transform: translateY(-2px);
+                    }
+
+                    .form-check-input:checked+.select-card {
+                              border-color: var(--primary-purple);
+                              background-color: var(--light-purple);
+                              box-shadow: 0 0 0 1px var(--primary-purple);
+                    }
+
+                    .select-icon {
+                              width: 44px;
+                              height: 44px;
+                              background: var(--light-purple);
+                              color: var(--primary-purple);
+                              border-radius: 12px;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              font-size: 1.25rem;
+                              transition: all 0.25s ease;
+                    }
+
+                    .select-card:hover .select-icon,
+                    .form-check-input:checked+.select-card .select-icon {
+                              background: var(--primary-purple);
+                              color: white;
+                    }
+
+                    /* Upload Box Styling */
+                    .upload-box {
+                              border: 2px dashed var(--border-color);
+                              border-radius: 16px;
+                              padding: 30px;
+                              text-align: center;
+                              cursor: pointer;
+                              background: var(--card-bg);
+                              transition: all 0.25s ease;
+                    }
+
+                    .upload-box:hover {
+                              border-color: var(--primary-purple);
+                              background-color: var(--light-purple);
+                    }
+
+                    .form-control,
+                    .form-select {
+                              background-color: var(--card-bg);
+                              color: var(--text-main);
+                              border: 1px solid var(--border-color);
+                              border-radius: 12px;
+                              padding: 12px 16px;
+                              font-size: 0.95rem;
+                    }
+
+                    .form-control:focus,
+                    .form-select:focus {
+                              background-color: var(--card-bg);
+                              color: var(--text-main);
+                              border-color: var(--primary-purple);
+                              box-shadow: 0 0 0 4px var(--light-purple);
+                    }
+
+                    .btn-primary-custom {
+                              background: var(--primary-purple);
+                              color: white;
+                              border: none;
+                              border-radius: 12px;
+                              padding: 12px 28px;
+                              font-weight: 500;
+                              transition: all 0.25s ease;
+                    }
+
+                    .btn-primary-custom:hover {
+                              background: var(--primary-hover);
+                              transform: translateY(-1px);
+                              box-shadow: 0 6px 20px rgba(124, 92, 252, 0.3);
+                              color: white;
+                    }
+
+                    [data-theme="dark"] .text-muted {
+                              color: var(--text-muted) !important;
+                    }
+
+                    /* Priority Pill Buttons: เน้นสีเมื่อถูกเลือก (ตรงกับ priority ENUM) */
+                    .btn-check:checked+label {
+                              background-color: var(--primary-purple) !important;
+                              color: white !important;
+                    }
+          </style>
+</head>
+
+<body>
+
+          <!-- Ambient Light Gradients -->
+          <div class="bg-glow-1"></div>
+          <div class="bg-glow-2"></div>
+
+          <!-- Navigation Bar -->
+          <nav class="navbar navbar-expand-lg sticky-top">
+                    <div class="container">
+                              <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                                        <span
+                                                  style="background: var(--primary-purple); width: 8px; height: 8px; display: inline-block; border-radius: 50%;"></span>
+                                        Student Voice
+                              </a>
+                              <button class="navbar-toggler border-0 shadow-none" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                                        <span class="navbar-toggler-icon"></span>
+                              </button>
+                              <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                                        <ul class="navbar-nav align-items-lg-center gap-lg-4 mx-auto mt-3 mt-lg-0"
+                                                  id="navList">
+                                                  <li class="nav-item"><a class="nav-link"
+                                                                      href="index.html">หน้าหลัก</a></li>
+                                                  <li class="nav-item"><a class="nav-link"
+                                                                      href="./report.html">ส่งคำร้อง</a></li>
+                                                  <li class="nav-item"><a class="nav-link active"
+                                                                      href="./repair.html">ระบบแจ้งซ่อม</a>
+                                                  </li>
+                                                  <li class="nav-item"><a class="nav-link" href="#">ติดตามสถานะ</a></li>
+                                                  <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
+                                                  <span class="nav-indicator" id="navIndicator"></span>
+                                        </ul>
+
+                                        <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+                                                  <div class="d-flex flex-column text-end d-none d-sm-flex">
+                                                            <span class="fw-medium"
+                                                                      style="font-size: 0.9rem; color: var(--text-main);">ชื่อ</span>
+                                                            <span class="text-muted"
+                                                                      style="font-size: 0.75rem;">รหัสนักศึกษา
+                                                                      6543210</span>
+                                                  </div>
+                                                  <div style="width: 1px; height: 24px; background-color: var(--border-color);"
+                                                            class="d-none d-sm-block"></div>
+                                                  <button class="btn-theme-toggle" id="themeToggleBtn"
+                                                            title="สลับโหมดการแสดงผล">
+                                                            <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg"
+                                                                      width="18" height="18" fill="currentColor"
+                                                                      viewBox="0 0 16 16">
+                                                                      <path
+                                                                                d="M6 .278a.768.768 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z" />
+                                                            </svg>
+                                                  </button>
+                                                  <a href="#" class="btn btn-logout">ออกจากระบบ</a>
+                                        </div>
+                              </div>
+                    </div>
+          </nav>
+
+          <!-- Main Content -->
+          <main class="container my-5 fade-in-up">
+                    <div class="row justify-content-center">
+                              <div class="col-lg-9">
+
+                                        <!-- Header Section & Split User Profile Card -->
+                                        <div class="mb-4">
+                                                  <span class="badge px-3 py-1 rounded-pill mb-2"
+                                                            style="background-color: var(--light-purple); color: var(--primary-purple); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.5px;">Report
+                                                            Portal</span>
+                                                  <h1 class="fw-bold h3 mb-2">ฟอร์มส่งคำร้องหรือความคิดเห็น</h1>
+                                                  <p class="text-muted mb-4" style="font-size: 0.95rem;">
+                                                            กรอกรายละเอียดข้อมูลปัญหา ข้อเสนอแนะ
+                                                            หรือส่งหลักฐานเพิ่มเติมถึงสภาวะแวดล้อมในสถานศึกษา</p>
+
+                                                  <!-- User Profile Banner Card (ตามเรฟ) -->
+                                                  <div
+                                                            class="user-profile-banner d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                                            <div class="d-flex align-items-center gap-3">
+                                                                      <div
+                                                                                style="width: 44px; height: 44px; background: var(--light-purple); color: var(--primary-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;">
+                                                                                <i class="bi bi-person-fill"></i>
+                                                                      </div>
+                                                                      <div>
+                                                                                <div class="fw-bold mb-1"
+                                                                                          style="font-size: 1.05rem;">
+                                                                                          ข้อมูลผู้แจ้งซ่อม</div>
+                                                                                <div class="text-muted"
+                                                                                          style="font-size: 0.92rem;">
+                                                                                          ระบบจะบันทึกข้อมูลและรหัสนักศึกษาของท่านแนบไปกับการแจ้งซ่อมโดยอัตโนมัติ
+                                                                                </div>
+                                                                      </div>
+                                                            </div>
+                                                            <div class="px-3 py-2 rounded-2 border ms-auto ms-md-0"
+                                                                      style="background-color: var(--bg-color); font-size: 0.85rem;">
+                                                                      <div class="text-main"><span
+                                                                                          class="fw-bold">ชื่อ-นามสกุล:</span>
+                                                                                ชื่อ
+                                                                                (จำลอง)</div>
+                                                                      <div class="text-main"><span
+                                                                                          class="fw-bold">รหัสนักศึกษา:</span>
+                                                                                6543210
+                                                                      </div>
+                                                            </div>
+                                                  </div>
+                                        </div>
+
+                                        <form>
+                                                  <div class="custom-card mb-4">
+
+                                                            <!-- Select Category -->
+                                                            <div class="mb-4">
+                                                                      <label
+                                                                                class="form-label fw-medium mb-3">เลือกประเภทการแจ้งซ่อม</label>
+                                                                      <div class="row g-3">
+                                                                                <div class="col-md-6">
+                                                                                          <input type="radio"
+                                                                                                    class="form-check-input d-none"
+                                                                                                    name="repairType"
+                                                                                                    id="typeRestroom"
+                                                                                                    checked>
+                                                                                          <label class="select-card d-flex align-items-center gap-3 w-100"
+                                                                                                    for="typeRestroom">
+                                                                                                    <div
+                                                                                                              class="select-icon">
+                                                                                                              <i
+                                                                                                                        class="bi bi-droplet"></i>
+                                                                                                    </div>
+                                                                                                    <div>
+                                                                                                              <div
+                                                                                                                        class="fw-semibold">
+                                                                                                                        ห้องน้ำ
+                                                                                                              </div>
+                                                                                                              <div
+                                                                                                                        class="text-muted small">
+                                                                                                                        ก๊อกน้ำชำรุด
+                                                                                                                        ท่อตัน
+                                                                                                                        หรืออุปกรณ์เสียหาย
+                                                                                                              </div>
+                                                                                                    </div>
+                                                                                          </label>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                          <input type="radio"
+                                                                                                    class="form-check-input d-none"
+                                                                                                    name="repairType"
+                                                                                                    id="typeClassroom">
+                                                                                          <label class="select-card d-flex align-items-center gap-3 w-100"
+                                                                                                    for="typeClassroom">
+                                                                                                    <div
+                                                                                                              class="select-icon">
+                                                                                                              <i
+                                                                                                                        class="bi bi-display"></i>
+                                                                                                    </div>
+                                                                                                    <div>
+                                                                                                              <div
+                                                                                                                        class="fw-semibold">
+                                                                                                                        ห้องเรียน
+                                                                                                              </div>
+                                                                                                              <div
+                                                                                                                        class="text-muted small">
+                                                                                                                        หลอดไฟ
+                                                                                                                        โต๊ะเก้าอี้
+                                                                                                                        หรือกระดานอัจฉริยะ
+                                                                                                              </div>
+                                                                                                    </div>
+                                                                                          </label>
+                                                                                </div>
+                                                                      </div>
+                                                            </div>
+
+                                                            <!-- Location Inputs: อาคาร > ชั้น > ห้อง (ตรงกับ BUILDINGS 1—N FLOORS 1—N ROOMS) -->
+                                                            <!-- ห้องน้ำ: แสดงแค่อาคาร / ห้องเรียน: แสดงครบอาคาร-ชั้น-ห้อง -->
+                                                            <div class="row g-3 mb-4" id="locationRow">
+                                                                      <div class="col-md-4" id="buildingCol">
+                                                                                <label for="building"
+                                                                                          class="form-label fw-medium">เลือกอาคาร</label>
+                                                                                <select id="building"
+                                                                                          class="form-select">
+                                                                                          <option selected disabled>
+                                                                                                    เลือกอาคาร</option>
+                                                                                          <option value="b1">อาคาร 1
+                                                                                          </option>
+                                                                                          <option value="b2">อาคาร 2
+                                                                                          </option>
+                                                                                          <option value="b3">อาคาร 3
+                                                                                          </option>
+                                                                                          <option value="b4">อาคาร 4
+                                                                                          </option>
+                                                                                          <option value="b5">อาคาร 5
+                                                                                          </option>
+                                                                                          <option value="b6">อาคาร 6
+                                                                                          </option>
+                                                                                          <option value="b7">อาคาร 7
+                                                                                          </option>
+                                                                                          <option value="b8">อาคาร 8
+                                                                                          </option>
+                                                                                          <option value="b9">อาคาร 9
+                                                                                          </option>
+                                                                                          <option value="b10">อาคาร 10
+                                                                                          </option>
+                                                                                          <option value="b11">อาคาร 11
+                                                                                          </option>
+                                                                                          <option value="b12">อาคาร 12
+                                                                                          </option>
+                                                                                          <option value="b13">อาคาร 13
+                                                                                          </option>
+                                                                                          <option value="b14">อาคาร 14
+                                                                                          </option>
+                                                                                </select>
+                                                                      </div>
+                                                                      <div class="col-md-4" id="floorCol">
+                                                                                <label for="floor"
+                                                                                          class="form-label fw-medium">เลือกชั้น</label>
+                                                                                <select id="floor" class="form-select">
+                                                                                          <option selected disabled>
+                                                                                                    เลือกอาคารก่อน
+                                                                                          </option>
+                                                                                </select>
+                                                                      </div>
+                                                                      <div class="col-md-4" id="roomCol">
+                                                                                <label for="roomNumber"
+                                                                                          class="form-label fw-medium">เลือกห้อง</label>
+                                                                                <select id="roomNumber"
+                                                                                          class="form-select">
+                                                                                          <option selected disabled>
+                                                                                                    เลือกชั้นก่อน
+                                                                                          </option>
+                                                                                </select>
+                                                                      </div>
+                                                            </div>
+
+                                                            <!-- Title -->
+                                                            <div class="mb-4">
+                                                                      <label for="reportTitle"
+                                                                                class="form-label fw-medium">หัวข้อปัญหา</label>
+                                                                      <input type="text" id="reportTitle"
+                                                                                class="form-control"
+                                                                                placeholder="เช่น ก๊อกน้ำห้องน้ำตึก 2 ชำรุด">
+                                                            </div>
+
+                                                            <!-- Priority -->
+                                                            <div class="mb-4">
+                                                                      <label
+                                                                                class="form-label fw-medium mb-2">ระดับความเร่งด่วน</label>
+                                                                      <div class="d-flex flex-wrap gap-2" role="group">
+                                                                                <input type="radio" class="btn-check"
+                                                                                          name="priority"
+                                                                                          id="priorityLow"
+                                                                                          autocomplete="off">
+                                                                                <label class="btn btn-outline-secondary rounded-pill px-3 py-1 border-0"
+                                                                                          style="background-color: var(--light-purple); color: var(--text-muted); font-size: 0.85rem;"
+                                                                                          for="priorityLow">ต่ำ</label>
+
+                                                                                <input type="radio" class="btn-check"
+                                                                                          name="priority"
+                                                                                          id="priorityMedium"
+                                                                                          autocomplete="off" checked>
+                                                                                <label class="btn btn-outline-secondary rounded-pill px-3 py-1 border-0"
+                                                                                          style="background-color: var(--light-purple); color: var(--text-muted); font-size: 0.85rem;"
+                                                                                          for="priorityMedium">ปานกลาง</label>
+
+                                                                                <input type="radio" class="btn-check"
+                                                                                          name="priority"
+                                                                                          id="priorityHigh"
+                                                                                          autocomplete="off">
+                                                                                <label class="btn btn-outline-secondary rounded-pill px-3 py-1 border-0"
+                                                                                          style="background-color: var(--light-purple); color: var(--text-muted); font-size: 0.85rem;"
+                                                                                          for="priorityHigh">สูง</label>
+
+                                                                                <input type="radio" class="btn-check"
+                                                                                          name="priority"
+                                                                                          id="priorityUrgent"
+                                                                                          autocomplete="off">
+                                                                                <label class="btn btn-outline-secondary rounded-pill px-3 py-1 border-0"
+                                                                                          style="background-color: var(--light-purple); color: var(--text-muted); font-size: 0.85rem;"
+                                                                                          for="priorityUrgent">ด่วน</label>
+                                                                      </div>
+                                                            </div>
+
+                                                            <!-- Problem Details -->
+                                                            <div class="mb-4">
+                                                                      <label for="details"
+                                                                                class="form-label fw-medium">รายละเอียดปัญหา</label>
+                                                                      <textarea id="details" class="form-control"
+                                                                                rows="4"
+                                                                                placeholder="อธิบายอาการ จุดที่เสีย หรือสิ่งที่พบให้ละเอียดที่สุด..."></textarea>
+                                                            </div>
+
+                                                            <!-- Upload Section -->
+                                                            <div class="mb-2">
+                                                                      <label class="form-label fw-medium">แนบรูปภาพ
+                                                                                (ไม่บังคับ)</label>
+                                                                      <div class="upload-box"
+                                                                                onclick="document.getElementById('fileInput').click();">
+                                                                                <div class="select-icon mx-auto mb-2">
+                                                                                          <i class="bi bi-image"></i>
+                                                                                </div>
+                                                                                <div class="fw-medium mb-1"
+                                                                                          style="font-size: 0.95rem;">
+                                                                                          แตะเพื่อเลือกรูปภาพ</div>
+                                                                                <div class="text-muted small">รองรับ
+                                                                                          JPG, PNG และ WebP ขนาดไม่เกิน
+                                                                                          5 MB</div>
+                                                                                <input type="file" id="fileInput"
+                                                                                          class="d-none"
+                                                                                          accept="image/*">
+                                                                      </div>
+                                                                      <div class="form-text text-muted mt-2 text-center"
+                                                                                style="font-size: 0.8rem;">
+                                                                                หมายเหตุ:
+                                                                                รองรับแนบได้สูงสุด 5
+                                                                                รูปต่อรายการแจ้งซ่อม
+                                                                                รูปภาพจะถูกบันทึกไว้เพื่อใช้ประกอบการตรวจสอบของทีมช่าง
+                                                                      </div>
+                                                            </div>
+
+                                                  </div>
+
+                                                  <!-- Form Action Buttons -->
+                                                  <div class="col-12 text-end mt-4">
+                                                            <a href="index.html"
+                                                                      class="btn btn-outline-secondary rounded-pill px-4 py-2 me-2 border-0 text-muted">ย้อนกลับ</a>
+                                                            <button type="submit"
+                                                                      class="btn btn-primary-custom px-5 py-2.5 rounded-pill shadow-sm">ส่งคำร้องแจ้งซ่อม</button>
+                                                  </div>
+                                        </form>
+
+                              </div>
+                    </div>
+          </main>
+
+          <!-- Bootstrap JS Bundle -->
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+          <!-- Interactive Script (Theme Toggle & Effects) -->
+          <script>
+                    const themeToggleBtn = document.getElementById('themeToggleBtn');
+                    const themeIcon = document.getElementById('themeIcon');
+                    const htmlElement = document.documentElement;
+
+                    const savedTheme = localStorage.getItem('theme') || 'light';
+                    if (savedTheme === 'dark') {
+                              htmlElement.setAttribute('data-theme', 'dark');
+                              setSunIcon();
+                    }
+
+                    themeToggleBtn.addEventListener('click', () => {
+                              if (htmlElement.getAttribute('data-theme') === 'dark') {
+                                        htmlElement.removeAttribute('data-theme');
+                                        localStorage.setItem('theme', 'light');
+                                        setMoonIcon();
+                              } else {
+                                        htmlElement.setAttribute('data-theme', 'dark');
+                                        localStorage.setItem('theme', 'dark');
+                                        setSunIcon();
+                              }
+                    });
+
+                    function setMoonIcon() {
+                              themeIcon.innerHTML = '<path d="M6 .278a.768.768 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>';
+                    }
+
+                    function setSunIcon() {
+                              themeIcon.innerHTML = '<path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>';
+                    }
+
+                    // ===== Sliding Navbar Indicator =====
+                    const navList = document.getElementById('navList');
+                    const navIndicator = document.getElementById('navIndicator');
+                    const navLinks = navList.querySelectorAll('.nav-link');
+
+                    function moveIndicatorTo(el) {
+                              if (!el) return;
+                              const linkRect = el.getBoundingClientRect();
+                              const listRect = navList.getBoundingClientRect();
+                              const offsetLeft = linkRect.left - listRect.left;
+                              navIndicator.style.width = linkRect.width + 'px';
+                              navIndicator.style.transform = `translateX(${offsetLeft}px)`;
+                              navIndicator.classList.add('ready');
+                    }
+
+                    function getActiveLink() {
+                              return navList.querySelector('.nav-link.active') || navLinks[0];
+                    }
+
+                    window.addEventListener('load', () => moveIndicatorTo(getActiveLink()));
+                    window.addEventListener('resize', () => moveIndicatorTo(
+                              navList.querySelector('.nav-link:hover') || getActiveLink()
+                    ));
+
+                    navLinks.forEach(link => {
+                              link.addEventListener('mouseenter', () => moveIndicatorTo(link));
+                    });
+
+                    navList.addEventListener('mouseleave', () => moveIndicatorTo(getActiveLink()));
+
+                    // ===== ห้องน้ำ: แสดงแค่ "เลือกอาคาร" / ห้องเรียน: แสดงครบ อาคาร-ชั้น-ห้อง =====
+                    const typeRestroom = document.getElementById('typeRestroom');
+                    const typeClassroom = document.getElementById('typeClassroom');
+                    const buildingCol = document.getElementById('buildingCol');
+                    const floorCol = document.getElementById('floorCol');
+                    const roomCol = document.getElementById('roomCol');
+                    const floorSelect = document.getElementById('floor');
+                    const roomSelect = document.getElementById('roomNumber');
+
+                    function updateLocationFields() {
+                              if (typeRestroom.checked) {
+                                        floorCol.style.display = 'none';
+                                        roomCol.style.display = 'none';
+                                        buildingCol.classList.remove('col-md-4');
+                                        buildingCol.classList.add('col-md-12');
+                                        floorSelect.selectedIndex = 0;
+                                        roomSelect.selectedIndex = 0;
+                              } else {
+                                        floorCol.style.display = '';
+                                        roomCol.style.display = '';
+                                        buildingCol.classList.remove('col-md-12');
+                                        buildingCol.classList.add('col-md-4');
+                              }
+                    }
+
+                    typeRestroom.addEventListener('change', updateLocationFields);
+                    typeClassroom.addEventListener('change', updateLocationFields);
+                    updateLocationFields();
+
+                    // ===== ระบบเลือกห้องแบบไดนามิก (อาคาร + ชั้น + ห้อง) =====
+                    // ข้อมูลห้องครบ 14 อาคาร แต่ละชั้นมี 8 ห้อง
+                    // รูปแบบ: "เลขอาคาร" + "เลขชั้น" + "เลขห้อง" (01-08)
+                    const roomData = {
+                              "b1": {
+                                        "f1": ["101", "102", "103", "104", "105", "106", "107", "108"],
+                                        "f2": ["121", "122", "123", "124", "125", "126", "127", "128"],
+                                        "f3": ["131", "132", "133", "134", "135", "136", "137", "138"],
+                                        "f4": ["141", "142", "143", "144", "145", "146", "147", "148"],
+                                        "f5": ["151", "152", "153", "154", "155", "156", "157", "158"],
+                                        "f6": ["161", "162", "163", "164", "165", "166", "167", "168"]
+                              },
+                              "b2": {
+                                        "f1": ["201", "202", "203", "204", "205", "206", "207", "208"],
+                                        "f2": ["221", "222", "223", "224", "225", "226", "227", "228"],
+                                        "f3": ["231", "232", "233", "234", "235", "236", "237", "238"],
+                                        "f4": ["241", "242", "243", "244", "245", "246", "247", "248"],
+                                        "f5": ["251", "252", "253", "254", "255", "256", "257", "258"],
+                                        "f6": ["261", "262", "263", "264", "265", "266", "267", "268"]
+                              },
+                              "b3": {
+                                        "f1": ["301", "302", "303", "304", "305", "306", "307", "308"],
+                                        "f2": ["321", "322", "323", "324", "325", "326", "327", "328"],
+                                        "f3": ["331", "332", "333", "334", "335", "336", "337", "338"],
+                                        "f4": ["341", "342", "343", "344", "345", "346", "347", "348"],
+                                        "f5": ["351", "352", "353", "354", "355", "356", "357", "358"],
+                                        "f6": ["361", "362", "363", "364", "365", "366", "367", "368"]
+                              },
+                              "b4": {
+                                        "f1": ["401", "402", "403", "404", "405", "406", "407", "408"],
+                                        "f2": ["421", "422", "423", "424", "425", "426", "427", "428"],
+                                        "f3": ["431", "432", "433", "434", "435", "436", "437", "438"],
+                                        "f4": ["441", "442", "443", "444", "445", "446", "447", "448"],
+                                        "f5": ["451", "452", "453", "454", "455", "456", "457", "458"],
+                                        "f6": ["461", "462", "463", "464", "465", "466", "467", "468"]
+                              },
+                              "b5": {
+                                        "f1": ["501", "502", "503", "504", "505", "506", "507", "508"],
+                                        "f2": ["521", "522", "523", "524", "525", "526", "527", "528"],
+                                        "f3": ["531", "532", "533", "534", "535", "536", "537", "538"],
+                                        "f4": ["541", "542", "543", "544", "545", "546", "547", "548"],
+                                        "f5": ["551", "552", "553", "554", "555", "556", "557", "558"],
+                                        "f6": ["561", "562", "563", "564", "565", "566", "567", "568"]
+                              },
+                              "b6": {
+                                        "f1": ["601", "602", "603", "604", "605", "606", "607", "608"],
+                                        "f2": ["621", "622", "623", "624", "625", "626", "627", "628"],
+                                        "f3": ["631", "632", "633", "634", "635", "636", "637", "638"],
+                                        "f4": ["641", "642", "643", "644", "645", "646", "647", "648"],
+                                        "f5": ["651", "652", "653", "654", "655", "656", "657", "658"],
+                                        "f6": ["661", "662", "663", "664", "665", "666", "667", "668"]
+                              },
+                              "b7": {
+                                        "f1": ["701", "702", "703", "704", "705", "706", "707", "708"],
+                                        "f2": ["721", "722", "723", "724", "725", "726", "727", "728"],
+                                        "f3": ["731", "732", "733", "734", "735", "736", "737", "738"],
+                                        "f4": ["741", "742", "743", "744", "745", "746", "747", "748"],
+                                        "f5": ["751", "752", "753", "754", "755", "756", "757", "758"],
+                                        "f6": ["761", "762", "763", "764", "765", "766", "767", "768"]
+                              },
+                              "b8": {
+                                        "f1": ["801", "802", "803", "804", "805", "806", "807", "808"],
+                                        "f2": ["821", "822", "823", "824", "825", "826", "827", "828"],
+                                        "f3": ["831", "832", "833", "834", "835", "836", "837", "838"],
+                                        "f4": ["841", "842", "843", "844", "845", "846", "847", "848"],
+                                        "f5": ["851", "852", "853", "854", "855", "856", "857", "858"],
+                                        "f6": ["861", "862", "863", "864", "865", "866", "867", "868"]
+                              },
+                              "b9": {
+                                        "f1": ["901", "902", "903", "904", "905", "906", "907", "908"],
+                                        "f2": ["921", "922", "923", "924", "925", "926", "927", "928"],
+                                        "f3": ["931", "932", "933", "934", "935", "936", "937", "938"],
+                                        "f4": ["941", "942", "943", "944", "945", "946", "947", "948"],
+                                        "f5": ["951", "952", "953", "954", "955", "956", "957", "958"],
+                                        "f6": ["961", "962", "963", "964", "965", "966", "967", "968"]
+                              },
+                              "b10": {
+                                        "f1": ["1001", "1002", "1003", "1004", "1005", "1006", "1007", "1008"],
+                                        "f2": ["1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028"],
+                                        "f3": ["1031", "1032", "1033", "1034", "1035", "1036", "1037", "1038"],
+                                        "f4": ["1041", "1042", "1043", "1044", "1045", "1046", "1047", "1048"],
+                                        "f5": ["1051", "1052", "1053", "1054", "1055", "1056", "1057", "1058"],
+                                        "f6": ["1061", "1062", "1063", "1064", "1065", "1066", "1067", "1068"]
+                              },
+                              "b11": {
+                                        "f1": ["1101", "1102", "1103", "1104", "1105", "1106", "1107", "1108"],
+                                        "f2": ["1121", "1122", "1123", "1124", "1125", "1126", "1127", "1128"],
+                                        "f3": ["1131", "1132", "1133", "1134", "1135", "1136", "1137", "1138"],
+                                        "f4": ["1141", "1142", "1143", "1144", "1145", "1146", "1147", "1148"],
+                                        "f5": ["1151", "1152", "1153", "1154", "1155", "1156", "1157", "1158"],
+                                        "f6": ["1161", "1162", "1163", "1164", "1165", "1166", "1167", "1168"]
+                              },
+                              "b12": {
+                                        "f1": ["1201", "1202", "1203", "1204", "1205", "1206", "1207", "1208"],
+                                        "f2": ["1221", "1222", "1223", "1224", "1225", "1226", "1227", "1228"],
+                                        "f3": ["1231", "1232", "1233", "1234", "1235", "1236", "1237", "1238"],
+                                        "f4": ["1241", "1242", "1243", "1244", "1245", "1246", "1247", "1248"],
+                                        "f5": ["1251", "1252", "1253", "1254", "1255", "1256", "1257", "1258"],
+                                        "f6": ["1261", "1262", "1263", "1264", "1265", "1266", "1267", "1268"]
+                              },
+                              "b13": {
+                                        "f1": ["1301", "1302", "1303", "1304", "1305", "1306", "1307", "1308"],
+                                        "f2": ["1321", "1322", "1323", "1324", "1325", "1326", "1327", "1328"],
+                                        "f3": ["1331", "1332", "1333", "1334", "1335", "1336", "1337", "1338"],
+                                        "f4": ["1341", "1342", "1343", "1344", "1345", "1346", "1347", "1348"],
+                                        "f5": ["1351", "1352", "1353", "1354", "1355", "1356", "1357", "1358"],
+                                        "f6": ["1361", "1362", "1363", "1364", "1365", "1366", "1367", "1368"]
+                              },
+                              "b14": {
+                                        "f1": ["1401", "1402", "1403", "1404", "1405", "1406", "1407", "1408"],
+                                        "f2": ["1421", "1422", "1423", "1424", "1425", "1426", "1427", "1428"],
+                                        "f3": ["1431", "1432", "1433", "1434", "1435", "1436", "1437", "1438"],
+                                        "f4": ["1441", "1442", "1443", "1444", "1445", "1446", "1447", "1448"],
+                                        "f5": ["1451", "1452", "1453", "1454", "1455", "1456", "1457", "1458"],
+                                        "f6": ["1461", "1462", "1463", "1464", "1465", "1466", "1467", "1468"]
+                              }
+                    };
+
+                    const buildingSelect = document.getElementById('building');
+
+                    // ฟังก์ชันอัปเดตตัวเลือกชั้นตามอาคารที่เลือก
+                    function updateFloors() {
+                              const selectedBuilding = buildingSelect.value;
+                              const floorSelect = document.getElementById('floor');
+                              // ล้างตัวเลือกเดิม
+                              floorSelect.innerHTML = '<option selected disabled>เลือกชั้น</option>';
+
+                              if (selectedBuilding && roomData[selectedBuilding]) {
+                                        const floors = Object.keys(roomData[selectedBuilding]);
+                                        floors.forEach(floor => {
+                                                  const option = document.createElement('option');
+                                                  option.value = floor;
+                                                  const floorNumber = floor.replace('f', '');
+                                                  option.textContent = `ชั้น ${floorNumber}`;
+                                                  floorSelect.appendChild(option);
+                                        });
+                              }
+
+                              // รีเซ็ตห้องด้วย
+                              updateRooms();
+                    }
+
+                    // ฟังก์ชันอัปเดตตัวเลือกห้องตามอาคารและชั้นที่เลือก
+                    function updateRooms() {
+                              const selectedBuilding = buildingSelect.value;
+                              const selectedFloor = document.getElementById('floor').value;
+                              const roomSelect = document.getElementById('roomNumber');
+                              // ล้างตัวเลือกเดิม
+                              roomSelect.innerHTML = '<option selected disabled>เลือกห้อง</option>';
+
+                              if (selectedBuilding && selectedFloor && roomData[selectedBuilding] && roomData[selectedBuilding][selectedFloor]) {
+                                        const rooms = roomData[selectedBuilding][selectedFloor];
+                                        rooms.forEach(room => {
+                                                  const option = document.createElement('option');
+                                                  option.value = room;
+                                                  option.textContent = `ห้อง ${room}`;
+                                                  roomSelect.appendChild(option);
+                                        });
+                              }
+                    }
+
+                    // ผูก event กับ select อาคารและชั้น
+                    buildingSelect.addEventListener('change', function () {
+                              if (typeRestroom.checked) return;
+                              updateFloors();
+                    });
+
+                    document.getElementById('floor').addEventListener('change', function () {
+                              if (typeRestroom.checked) return;
+                              updateRooms();
+                    });
+
+                    // เพิ่ม event ให้กับ radio ห้องน้ำ/ห้องเรียน เพื่อรีเซ็ต/อัปเดตตามความเหมาะสม
+                    typeRestroom.addEventListener('change', function () {
+                              if (this.checked) {
+                                        document.getElementById('floor').innerHTML = '<option selected disabled>เลือกอาคารก่อน</option>';
+                                        document.getElementById('roomNumber').innerHTML = '<option selected disabled>เลือกชั้นก่อน</option>';
+                              }
+                    });
+
+                    typeClassroom.addEventListener('change', function () {
+                              if (this.checked) {
+                                        if (buildingSelect.value && buildingSelect.value !== '') {
+                                                  updateFloors();
+                                        } else {
+                                                  document.getElementById('floor').innerHTML = '<option selected disabled>เลือกอาคารก่อน</option>';
+                                                  document.getElementById('roomNumber').innerHTML = '<option selected disabled>เลือกชั้นก่อน</option>';
+                                        }
+                              }
+                    });
+
+                    // เรียกตอนโหลดหน้าเพื่อให้ข้อมูลชั้น/ห้องเป็นค่าตั้งต้น (ถ้าห้องเรียนถูกเลือกอยู่)
+                    if (typeClassroom.checked) {
+                              if (buildingSelect.value && buildingSelect.value !== '') {
+                                        updateFloors();
+                              }
+                    }
+          </script>
+</body>
+
+</html>
